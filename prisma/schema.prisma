@@ -1,0 +1,126 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Article {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String
+  content     String
+  author      String
+  imageUrl    String?
+  publishedAt DateTime
+  updatedAt   DateTime @updatedAt
+  featured    Boolean  @default(false)
+  
+  // Attribution fields
+  source       String
+  sourceUrl    String
+  sourceDomain String?
+  
+  // Relations
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  tags       Tag[]    @relation("ArticleTags")
+  
+  // User interactions
+  bookmarks UserBookmark[]
+  views     ArticleView[]
+  
+  createdAt DateTime @default(now())
+  
+  @@index([categoryId])
+  @@index([slug])
+  @@index([publishedAt])
+  @@index([featured])
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  slug        String    @unique
+  description String?
+  articles    Article[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  @@index([slug])
+}
+
+model Tag {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  articles  Article[] @relation("ArticleTags")
+  createdAt DateTime  @default(now())
+  
+  @@index([slug])
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String?
+  passwordHash  String
+  role          String         @default("READER") // READER, EDITOR, ADMIN
+  emailVerified Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  
+  // User preferences
+  preferences   UserPreferences?
+  
+  // User activity
+  bookmarks     UserBookmark[]
+  views         ArticleView[]
+  
+  @@index([email])
+}
+
+model UserPreferences {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  theme        String   @default("light")
+  language     String   @default("en")
+  emailUpdates Boolean  @default(true)
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model UserBookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  articleId String
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  
+  @@unique([userId, articleId])
+  @@index([userId])
+  @@index([articleId])
+}
+
+model ArticleView {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  articleId String
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  viewedAt  DateTime @default(now())
+  
+  @@index([userId])
+  @@index([articleId])
+  @@index([viewedAt])
+}

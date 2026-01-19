@@ -1,70 +1,117 @@
-// Color palette with eye-comfort focus
+/**
+ * Archv Color System
+ * A sophisticated dark palette for the passive news archive
+ */
+
 export const colors = {
-  // Backgrounds - warm, soft tones
+  // Base backgrounds
   background: {
-    primary: '#faf8f3',      // Soft warm cream (main background)
-    surface: '#ffffff',       // Pure white (cards, elevated elements)
-    secondary: '#f5f1e8',     // Slightly darker warm tone
+    primary: '#0f1419',    // Deep archive dark
+    secondary: '#1a2028',  // Elevated surfaces
+    tertiary: '#232c36',   // Cards and containers
+    elevated: '#2d3748',   // Hover states
   },
   
-  // Text colors - high contrast (7:1 ratio for accessibility)
+  // Text colors
   text: {
-    primary: '#2d2a26',       // Dark brown (main text)
-    secondary: '#5a544c',     // Muted brown (secondary text)
-    muted: '#8a8077',         // Very muted (hints, labels)
+    primary: '#f7fafc',    // High emphasis
+    secondary: '#cbd5e0',  // Medium emphasis
+    tertiary: '#718096',   // Low emphasis
+    muted: '#4a5568',      // Disabled/hints
   },
   
-  // Accent colors - muted but distinguishable
+  // Accent colors
   accent: {
-    primary: '#d4722b',       // Warm terracotta
-    primaryHover: '#b8621f',
-    secondary: '#7b9f8e',     // Muted sage green
-    info: '#6b8ea8',          // Soft blue-gray
-    warning: '#d4a342',       // Warm amber
+    primary: '#f59e0b',    // Amber - primary actions
+    secondary: '#d97706',  // Darker amber - hover
+    tertiary: '#fbbf24',   // Lighter amber - highlights
   },
   
-  // Category-specific colors (muted palette)
-  categories: {
-    World: '#7b9f8e',
-    Politics: '#9b7d9b',
-    Business: '#8a8ea8',
-    Technology: '#7893a8',
-    Sports: '#a87878',
-    Entertainment: '#c89078',
-    Science: '#78a8a8',
-    Health: '#8ea87b',
+  // Semantic colors
+  semantic: {
+    success: '#10b981',    // Emerald
+    warning: '#f59e0b',    // Amber
+    error: '#ef4444',      // Red
+    info: '#3b82f6',       // Blue
   },
   
-  // Dark mode variants
-  dark: {
-    background: {
-      primary: '#1a1816',
-      surface: '#252220',
-      secondary: '#2d2926',
-    },
-    text: {
-      primary: '#e8e4dc',
-      secondary: '#c4bfb5',
-      muted: '#8a8077',
-    },
-    accent: {
-      primary: '#e68a4f',
-      primaryHover: '#f29d63',
-      secondary: '#92b5a3',
-      info: '#8aa8c4',
-      warning: '#e6b85f',
-    },
+  // Border colors
+  border: {
+    default: '#2d3748',
+    light: '#374151',
+    heavy: '#4b5563',
   },
-} as const;
-
-// Helper function to get category color
-export const getCategoryColor = (category: string): string => {
-  return colors.categories[category as keyof typeof colors.categories] || colors.accent.secondary;
 };
 
-// Contrast ratios (for reference/documentation)
-export const contrastRatios = {
-  textOnBackground: 7.1,      // WCAG AAA compliant
-  secondaryOnBackground: 4.8, // WCAG AA compliant
-  mutedOnBackground: 3.2,     // For non-essential text
+/**
+ * Category-specific colors for visual distinction
+ * Carefully selected for accessibility and visual harmony
+ */
+export const categoryColors = {
+  technology: {
+    bg: '#8b5cf6',      // Purple
+    text: '#ffffff',
+    hover: '#7c3aed',
+  },
+  business: {
+    bg: '#10b981',      // Emerald
+    text: '#ffffff',
+    hover: '#059669',
+  },
+  sports: {
+    bg: '#3b82f6',      // Blue
+    text: '#ffffff',
+    hover: '#2563eb',
+  },
+  entertainment: {
+    bg: '#ec4899',      // Pink
+    text: '#ffffff',
+    hover: '#db2777',
+  },
+  health: {
+    bg: '#ef4444',      // Red
+    text: '#ffffff',
+    hover: '#dc2626',
+  },
+  science: {
+    bg: '#06b6d4',      // Cyan
+    text: '#ffffff',
+    hover: '#0891b2',
+  },
+  general: {
+    bg: '#64748b',      // Slate
+    text: '#ffffff',
+    hover: '#475569',
+  },
 };
+
+/**
+ * Get colors for a specific category
+ */
+export function getCategoryColors(category: string) {
+  const normalizedCategory = category.toLowerCase() as keyof typeof categoryColors;
+  return categoryColors[normalizedCategory] || categoryColors.general;
+}
+
+/**
+ * Dark theme variants for different contexts
+ */
+export const darkVariants = {
+  surface: {
+    default: colors.background.tertiary,
+    hover: colors.background.elevated,
+    active: '#374151',
+  },
+  overlay: {
+    light: 'rgba(0, 0, 0, 0.4)',
+    medium: 'rgba(0, 0, 0, 0.6)',
+    heavy: 'rgba(0, 0, 0, 0.8)',
+  },
+  glow: {
+    amber: 'rgba(245, 158, 11, 0.1)',
+    purple: 'rgba(139, 92, 246, 0.1)',
+    blue: 'rgba(59, 130, 246, 0.1)',
+  },
+};
+
+export default colors;

@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
-import { getCategoryColor } from '@/config/colors';
-import { fetchAllCategoryArticles } from '@/lib/newsapi';
+import { getCategoryColors } from '@/config/colors';
+import { getArticleBySlug } from '@/lib/articles';
+import { OfflineWarning } from '@/components/OfflineWarning';
 
 export const revalidate = 300; // Revalidate every 5 minutes
 
@@ -11,14 +12,13 @@ interface ArticlePageProps {
 }
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
-  const allArticles = await fetchAllCategoryArticles();
-  const article = allArticles.find(a => a.slug === params.slug);
+  const article = await getArticleBySlug(params.slug);
 
   if (!article) {
     notFound();
   }
 
-  const categoryColor = getCategoryColor(article.category);
+  const categoryColor = getCategoryColors(article.category);
   const formattedDate = new Intl.DateTimeFormat('en-US', {
     month: 'long',
     day: 'numeric',
@@ -28,112 +28,72 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
   }).format(article.publishedAt);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[var(--color-bg-primary)]">
       {/* Header */}
-      <header className="bg-surface shadow-sm border-b border-surface-secondary">
-        <div className="max-w-4xl mx-auto px-6 py-6">
-          <a href="/" className="text-accent-primary hover:text-accent-primary-hover text-sm font-medium">
-            ← Back to Home
+      <header className="bg-[var(--color-bg-secondary)] border-b border-[var(--color-border)] sticky top-0 z-10">
+        <div className="max-w-3xl mx-auto px-6 py-4">
+          <a href="/" className="inline-flex items-center gap-2 text-[var(--color-accent-primary)] text-sm font-semibold">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
           </a>
         </div>
       </header>
 
-      <article className="max-w-4xl mx-auto px-6 py-12">
+      <article className="max-w-3xl mx-auto px-6 py-8 space-y-6">
         {/* Category */}
-        <div className="mb-4">
-          <span
-            className="inline-block px-4 py-1.5 rounded-full text-sm font-medium"
-            style={{
-              backgroundColor: `${categoryColor}20`,
-              color: categoryColor,
-              border: `1.5px solid ${categoryColor}40`,
-            }}
-          >
-            {article.category}
-          </span>
-        </div>
+        <span
+          className="badge inline-block"
+          style={{
+            backgroundColor: categoryColor.bg,
+            color: categoryColor.text,
+          }}
+        >
+          {article.category}
+        </span>
 
-        {/* Title - Very large and prominent */}
-        <h1 className="text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
+        {/* Title */}
+        <h1 className="text-display leading-tight">
           {article.title}
         </h1>
 
         {/* Metadata */}
-        <div className="mb-10 border-b border-surface-secondary pb-8">
-          <div className="space-y-3">
-            <div>
-              <p className="text-sm text-foreground-muted mb-1">Written by</p>
-              <p className="text-lg font-semibold text-foreground">{article.author}</p>
-            </div>
-            <div>
-              <p className="text-sm text-foreground-muted mb-1">Originally published by</p>
-              <a 
-                href={article.sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-lg font-semibold text-accent-primary hover:text-accent-primary-hover transition-colors"
-              >
-                {article.source}
-              </a>
-              {article.sourceDomain && (
-                <p className="text-sm text-foreground-muted mt-1">({article.sourceDomain})</p>
-              )}
-            </div>
-            <div>
-              <p className="text-sm text-foreground-muted">{formattedDate}</p>
-            </div>
-          </div>
+        <div className="flex items-center gap-2 text-sm text-[var(--color-text-tertiary)] pb-6 border-b border-[var(--color-border)]">
+          <span className="font-semibold text-[var(--color-text-primary)]">{article.author}</span>
+          <span>•</span>
+          <time dateTime={article.publishedAt.toISOString()}>{formattedDate}</time>
         </div>
 
-        {/* Excerpt/Preview Content */}
-        <div className="prose prose-lg max-w-none">
-          <div className="bg-surface border border-surface-secondary rounded-2xl p-8 mb-8">
-            <h2 className="text-2xl font-semibold text-foreground mb-4">Article Preview</h2>
-            <p className="text-foreground-secondary leading-relaxed text-lg mb-4">
-              {article.excerpt}
-            </p>
-            <p className="text-foreground-secondary leading-relaxed text-lg">
-              {article.content}
-            </p>
-          </div>
-
-          {/* Legal Notice */}
-          <div className="bg-accent-warning/10 border border-accent-warning/30 rounded-xl p-6 mb-8">
-            <p className="text-sm text-foreground-secondary leading-relaxed">
-              <strong className="text-foreground">Content Attribution Notice:</strong> This is a preview of an article originally published by {article.source}. 
-              We respect intellectual property rights and provide this excerpt under fair use principles. 
-              To read the complete article, please visit the original source.
-            </p>
-          </div>
-
-          {/* Call to Action - Read Full Article */}
-          <div className="text-center py-8">
-            <a
-              href={article.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-3 px-8 py-4 bg-accent-primary text-white font-semibold text-lg rounded-xl hover:bg-accent-primary-hover transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-              Read Full Article at {article.source}
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </a>
-            <p className="text-sm text-foreground-muted mt-4">
-              Opens in new tab • All rights reserved by original publisher
-            </p>
-          </div>
+        {/* Content */}
+        <div className="card space-y-4">
+          <p className="text-body leading-relaxed text-[var(--color-text-secondary)]">
+            {article.excerpt}
+          </p>
+          <p className="text-body leading-relaxed text-[var(--color-text-secondary)]">
+            {article.content}
+          </p>
         </div>
+
+        {/* Attribution */}
+        <div className="card bg-amber-500/10">
+          <p className="text-sm text-[var(--color-text-secondary)]">
+            <strong className="text-[var(--color-text-primary)]">Source:</strong> This article was originally published by <a href={article.sourceUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-[var(--color-accent-primary)]">{article.source}</a>. We respect copyright and provide excerpts under fair use.
+          </p>
+        </div>
+
+        {/* Call to Action */}
+        <OfflineWarning sourceUrl={article.sourceUrl} sourceName={article.source} />
 
         {/* Tags */}
         {article.tags.length > 0 && (
-          <div className="mt-12 pt-8 border-t border-surface-secondary">
-            <h3 className="text-sm font-semibold text-foreground-muted mb-3">TAGS</h3>
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-[var(--color-text-tertiary)] uppercase tracking-wide">Related Topics</h3>
             <div className="flex flex-wrap gap-2">
               {article.tags.map((tag) => (
                 <span
                   key={tag}
-                  className="px-3 py-1.5 bg-surface-secondary text-foreground-secondary text-sm rounded-full"
+                  className="px-3 py-1.5 bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)] text-sm rounded-full"
                 >
                   #{tag}
                 </span>

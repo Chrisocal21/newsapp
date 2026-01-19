@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Article } from '@/types/article';
 import { siteConfig } from '@/config/site';
-import { getCategoryColor } from '@/config/colors';
+import { getCategoryColors } from '@/config/colors';
 import { SwipeContainer } from './SwipeContainer';
 import { ArticleCard } from './ArticleCard';
 import { FeaturedArticle } from './FeaturedArticle';
@@ -17,7 +17,6 @@ export function SwipeableCategoryView({ allArticles }: SwipeableCategoryViewProp
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState(0);
   const [currentArticleIndex, setCurrentArticleIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [isExpanded, setIsExpanded] = useState(false);
 
   const currentCategory = categories[currentCategoryIndex];
 
@@ -53,7 +52,6 @@ export function SwipeableCategoryView({ allArticles }: SwipeableCategoryViewProp
   const handleSwipeUp = () => {
     if (currentArticleIndex < filteredArticles.length - 1) {
       setIsTransitioning(true);
-      setIsExpanded(false); // Collapse when moving to next article
       setTimeout(() => {
         setCurrentArticleIndex(prev => prev + 1);
         setIsTransitioning(false);
@@ -64,17 +62,11 @@ export function SwipeableCategoryView({ allArticles }: SwipeableCategoryViewProp
   const handleSwipeDown = () => {
     if (currentArticleIndex > 0) {
       setIsTransitioning(true);
-      setIsExpanded(false); // Collapse when moving to previous article
       setTimeout(() => {
         setCurrentArticleIndex(prev => prev - 1);
         setIsTransitioning(false);
       }, 150);
     }
-  };
-
-  const toggleExpanded = () => {
-    setIsExpanded(false); // Collapse when changing category
-    setIsExpanded(!isExpanded);
   };
 
   const handleCategoryClick = (index: number) => {
@@ -106,293 +98,120 @@ export function SwipeableCategoryView({ allArticles }: SwipeableCategoryViewProp
 
   return (
     <div className="flex flex-col h-full">
-      {/* Fixed Category Navigation */}
-      <div className="flex-shrink-0 bg-background border-b border-surface-secondary">
-        <div className="flex items-center justify-between px-4 py-2">
-          <h2 className="text-lg font-semibold text-foreground">
-            {currentCategory === 'All' ? 'All News' : `${currentCategory} News`}
-          </h2>
-          <div className="flex items-center gap-2 text-xs text-foreground-muted">
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
-            </svg>
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-            </svg>
+      {/* Minimal Top Bar */}
+      <div className="fixed top-0 left-0 right-0 z-20 bg-gradient-to-b from-black/80 to-transparent pt-4 sm:pt-5">
+        <div className="flex items-center justify-between px-8 sm:px-10 md:px-12 py-3 pb-4">
+          <div className="text-white font-bold text-4xl">
+            Archv
           </div>
-        </div>
-        
-        <div className="flex flex-wrap gap-2 px-4 pb-2 justify-center">
-          {categories.map((category, index) => {
-            const isActive = index === currentCategoryIndex;
-            const categoryColor = category === 'All' ? '#d4722b' : getCategoryColor(category);
-            
-            return (
-              <button
-                key={category}
-                onClick={() => handleCategoryClick(index)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap ${
-                  isActive ? 'shadow-md scale-105' : 'hover:scale-105'
-                }`}
-                style={{
-                  backgroundColor: isActive ? categoryColor : `${categoryColor}20`,
-                  color: isActive ? 'white' : categoryColor,
-                  border: `1.5px solid ${isActive ? categoryColor : `${categoryColor}40`}`,
-                }}
-              >
-                {category}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Progress indicator */}
-        <div className="px-4 pb-2 flex gap-1">
-          {categories.map((_, index) => (
-            <div
-              key={index}
-              className={`h-0.5 rounded-full flex-1 transition-all duration-200 ${
-                index === currentCategoryIndex ? 'bg-accent-primary' : 'bg-surface-secondary'
-              }`}
-            />
-          ))}
+          <div className="text-white/60 text-sm">
+            {currentArticleIndex + 1}/{filteredArticles.length}
+          </div>
         </div>
       </div>
 
-      {/* Swipeable Article Content */}
+      {/* Full Screen Swipeable Content */}
       <SwipeContainer 
         onSwipeLeft={handleSwipeLeft} 
         onSwipeRight={handleSwipeRight}
         onSwipeUp={handleSwipeUp}
         onSwipeDown={handleSwipeDown}
       >
-        <div className={`px-4 py-2 mt-8 transition-opacity duration-150 ${isTransitioning ? 'opacity-50' : 'opacity-100'}`}>
-          {currentArticle ? (
-            <div className="w-full max-w-3xl mx-auto">
-              {/* Article counter */}
-              <div className="text-center">
-                <span className="text-xs text-foreground-muted">
-                  {currentArticleIndex + 1} / {filteredArticles.length}
-                </span>
-              </div>
-
-              {/* Article Card */}
-              <div className="bg-surface rounded-2xl shadow-sm border border-surface-secondary overflow-hidden">
-                {/* Title - Always Visible */}
-                <div 
-                  onClick={toggleExpanded}
-                  className="p-6 pb-4 cursor-pointer hover:bg-surface-secondary/30 transition-colors"
+        <div className="h-full w-full relative flex flex-col">
+          <div className="h-20"></div>
+          
+          {/* Category Pills */}
+          <div className="flex justify-between gap-4 px-8 sm:px-10 md:px-12 mb-8">
+            {categories.map((category, index) => {
+              const isActive = index === currentCategoryIndex;
+              
+              return (
+                <button
+                  key={category}
+                  onClick={() => handleCategoryClick(index)}
+                  className={`flex-1 px-4 py-4 rounded-full text-base font-bold whitespace-nowrap transition-all shadow-lg ${
+                    isActive ? 'bg-white text-black scale-105' : 'bg-white/30 text-white'
+                  }`}
                 >
-                  {/* Category badge */}
-                  <div className="mb-3">
-                    <span 
-                      className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wide"
-                      style={{
-                        backgroundColor: `${getCategoryColor(currentArticle.category)}20`,
-                        color: getCategoryColor(currentArticle.category),
-                        border: `1.5px solid ${getCategoryColor(currentArticle.category)}40`,
-                      }}
-                    >
-                      {currentArticle.category}
-                    </span>
+                  {category}
+                </button>
+              );
+            })}
+          </div>
+
+          {currentArticle ? (
+            <div className="flex-1 w-full flex items-center justify-center px-5 sm:px-6">
+              {/* Full Screen Card */}
+              <div className="relative w-full max-w-sm h-[75vh] bg-gradient-to-br from-[var(--color-bg-secondary)] to-[var(--color-bg-tertiary)] rounded-3xl shadow-2xl overflow-hidden z-10">
+                {/* Category Badge - Top Left */}
+                <div className="absolute top-5 left-5 z-10">
+                  <span 
+                    className="px-2.5 py-1 rounded-full text-[10px] font-semibold shadow-lg"
+                    style={{
+                      backgroundColor: getCategoryColors(currentArticle.category).bg,
+                      color: getCategoryColors(currentArticle.category).text,
+                    }}
+                  >
+                    {currentArticle.category}
+                  </span>
+                </div>
+
+                {/* Content Container - Updated padding */}
+                <div className="h-full flex flex-col px-6 py-5 items-center">
+                  {/* Spacer for top badge */}
+                  <div className="h-16 w-full"></div>
+
+                  {/* Main Content - Inner padding */}
+                  <div className="flex-1 flex flex-col justify-start space-y-4 w-full max-w-[240px]">
+                    {/* Title */}
+                    <h2 className="text-2xl font-bold text-[var(--color-text-primary)] leading-tight">
+                      {currentArticle.title}
+                    </h2>
+
+                    {/* Excerpt */}
+                    <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed line-clamp-6">
+                      {currentArticle.excerpt}
+                    </p>
                   </div>
 
-                  {/* Title */}
-                  <h2 className="text-3xl md:text-4xl font-bold text-foreground leading-tight mb-4 hover:text-accent-primary transition-colors">
-                    {currentArticle.title}
-                  </h2>
-
-                  {/* Article metadata */}
-                  <div className="space-y-2 mb-4">
-                    {/* Source */}
-                    <div className="flex items-center gap-2 text-sm text-foreground-secondary">
-                      <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                      </svg>
-                      <a
-                        href={currentArticle.sourceUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:text-accent-primary transition-colors font-medium"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {currentArticle.source}
-                      </a>
-                    </div>
-
-                    {/* Author */}
-                    {currentArticle.author && (
-                      <div className="flex items-center gap-2 text-sm text-foreground-secondary">
-                        <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        <span>{currentArticle.author}</span>
-                      </div>
-                    )}
-
-                    {/* Date */}
-                    <div className="flex items-center gap-2 text-sm text-foreground-secondary">
-                      <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      <time dateTime={typeof currentArticle.publishedAt === 'string' ? currentArticle.publishedAt : currentArticle.publishedAt.toISOString()}>
+                  {/* Bottom Info & Action */}
+                  <div className="space-y-3 mt-auto">
+                    {/* Metadata */}
+                    <div className="flex items-center justify-between text-sm px-1">
+                      <span className="font-semibold text-[var(--color-text-primary)]">{currentArticle.author}</span>
+                      <time className="text-[var(--color-text-tertiary)]">
                         {new Date(currentArticle.publishedAt).toLocaleDateString('en-US', {
-                          month: 'long',
+                          month: 'short',
                           day: 'numeric',
-                          year: 'numeric',
                         })}
                       </time>
                     </div>
-                  </div>
 
-                  {/* Expand indicator */}
-                  <div className="flex items-center justify-center">
-                    <div className="text-foreground-muted text-xs flex items-center gap-1.5">
-                      <span>Tap to view details</span>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                    {/* Read Button */}
+                    <a
+                      href={`/article/${currentArticle.slug}`}
+                      className="block w-full py-4 bg-[var(--color-accent-primary)] text-white text-center font-bold text-base rounded-2xl active:scale-95 transition-transform"
+                    >
+                      Read Article
+                    </a>
 
-              {/* Navigation hints - compact */}
-              <div className="text-center">
-                <div className="text-xs text-foreground-muted flex items-center justify-center gap-3">
-                  {currentArticleIndex > 0 && (
-                    <span className="flex items-center gap-1">
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                      </svg>
-                      <span className="hidden sm:inline">Prev</span>
-                    </span>
-                  )}
-                  {currentArticleIndex < filteredArticles.length - 1 && (
-                    <span className="flex items-center gap-1">
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                      </svg>
-                      <span className="hidden sm:inline">Next</span>
-                    </span>
-                  )}
-                  <span className="hidden sm:inline">•</span>
-                  <span className="flex items-center gap-1">
-                    <span className="hidden sm:inline">Swipe ←→ for categories</span>
-                    <span className="sm:hidden">←→ Categories</span>
-                  </span>
+                    {/* Swipe Hint */}
+                    <p className="text-center text-xs text-[var(--color-text-tertiary)] pb-2">
+                      Swipe up for next • Swipe down for previous
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="w-full max-w-4xl mx-auto">
-              <div className="bg-surface rounded-2xl shadow-sm p-8 text-center border border-surface-secondary">
-                <p className="text-foreground-secondary">No articles in this category</p>
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center">
+                <p className="text-[var(--color-text-secondary)]">No articles in this category</p>
               </div>
             </div>
           )}
         </div>
       </SwipeContainer>
-
-      {/* Modal Popup for Expanded Content */}
-      {isExpanded && currentArticle && (
-        <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          onClick={toggleExpanded}
-        >
-          <div 
-            className="bg-surface rounded-2xl shadow-2xl border border-surface-secondary max-w-2xl w-full max-h-[85vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close button */}
-            <div className="sticky top-0 bg-surface border-b border-surface-secondary px-6 py-3 flex items-center justify-between">
-              <span className="text-sm font-medium text-foreground">Article Details</span>
-              <button
-                onClick={toggleExpanded}
-                className="text-foreground-muted hover:text-foreground transition-colors p-1"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Modal Content */}
-            <div className="px-6 py-4">
-              {/* Category badge */}
-              <div className="mb-3">
-                <span 
-                  className="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wide"
-                  style={{
-                    backgroundColor: `${getCategoryColor(currentArticle.category)}20`,
-                    color: getCategoryColor(currentArticle.category),
-                    border: `1.5px solid ${getCategoryColor(currentArticle.category)}40`,
-                  }}
-                >
-                  {currentArticle.category}
-                </span>
-              </div>
-
-              {/* Title */}
-              <h2 className="text-2xl md:text-3xl font-bold text-foreground leading-tight mb-3">
-                {currentArticle.title}
-              </h2>
-
-              {/* Published date and author */}
-              <div className="flex items-center gap-3 text-xs text-foreground-secondary mb-4 pb-4 border-b border-surface-secondary">
-                <time dateTime={typeof currentArticle.publishedAt === 'string' ? currentArticle.publishedAt : currentArticle.publishedAt.toISOString()}>
-                  {new Date(currentArticle.publishedAt).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                  })}
-                </time>
-                {currentArticle.author && (
-                  <>
-                    <span>•</span>
-                    <span>{currentArticle.author}</span>
-                  </>
-                )}
-              </div>
-
-              {/* Excerpt */}
-              {currentArticle.excerpt && (
-                <p className="text-base text-foreground-secondary leading-relaxed mb-6">
-                  {currentArticle.excerpt}
-                </p>
-              )}
-
-              {/* Read Full Article Button */}
-              <a
-                href={currentArticle.sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-accent-primary hover:bg-accent-hover text-white text-sm font-medium rounded-lg transition-colors duration-200 mb-4"
-              >
-                Read Full Article
-                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-              </a>
-
-              {/* Attribution */}
-              <div className="pt-4 border-t border-surface-secondary">
-                <p className="text-xs text-foreground-muted">
-                  Originally published:{' '}
-                  <a
-                    href={currentArticle.sourceUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-accent-primary hover:underline font-medium"
-                  >
-                    {currentArticle.source}
-                  </a>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

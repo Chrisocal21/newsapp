@@ -21,10 +21,12 @@ export function SwipeContainer({
 }: SwipeContainerProps) {
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
   const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const handleTouchStart = (e: TouchEvent) => {
     setTouchEnd(null);
+    setIsDragging(true);
     setTouchStart({
       x: e.targetTouches[0].clientX,
       y: e.targetTouches[0].clientY,
@@ -64,7 +66,16 @@ export function SwipeContainer({
         }
       }
     }
+
+    setIsDragging(false);
+    setTouchStart(null);
+    setTouchEnd(null);
   };
+
+  // Calculate drag offset
+  const dragOffset = isDragging && touchStart && touchEnd
+    ? { x: touchEnd.x - touchStart.x, y: touchEnd.y - touchStart.y }
+    : { x: 0, y: 0 };
 
   useEffect(() => {
     const container = containerRef.current;
@@ -83,7 +94,14 @@ export function SwipeContainer({
 
   return (
     <div ref={containerRef} className="touch-pan-y">
-      {children}
+      <div 
+        style={{
+          transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)`,
+          transition: isDragging ? 'none' : 'transform 0.3s ease-out',
+        }}
+      >
+        {children}
+      </div>
     </div>
   );
 }

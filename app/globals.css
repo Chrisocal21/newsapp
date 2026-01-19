@@ -1,108 +1,56 @@
 @import "tailwindcss";
 
 :root {
-  /* Warm, eye-comfortable backgrounds */
-  --background: #faf8f3;       /* Soft warm cream */
-  --surface: #ffffff;           /* Pure white for cards */
-  --surface-secondary: #f5f1e8; /* Slightly darker warm tone */
+  /* Colors */
+  --color-bg-primary: #0f1419;
+  --color-bg-secondary: #1a2028;
+  --color-bg-tertiary: #232c36;
   
-  /* Text colors with high contrast (7:1 ratio) */
-  --foreground: #2d2a26;        /* Dark brown, softer than black */
-  --foreground-secondary: #5a544c; /* Muted brown for secondary text */
-  --foreground-muted: #8a8077;  /* Very muted for hints/labels */
+  --color-text-primary: #f7fafc;
+  --color-text-secondary: #cbd5e0;
+  --color-text-tertiary: #718096;
   
-  /* Accent colors - muted but distinguishable */
-  --accent-primary: #d4722b;    /* Warm terracotta */
-  --accent-primary-hover: #b8621f;
-  --accent-secondary: #7b9f8e;  /* Muted sage green */
-  --accent-info: #6b8ea8;       /* Soft blue-gray */
-  --accent-warning: #d4a342;    /* Warm amber */
+  --color-accent-primary: #f59e0b;
+  --color-accent-secondary: #d97706;
   
-  /* Category colors - muted palette */
-  --category-world: #7b9f8e;
-  --category-politics: #9b7d9b;
-  --category-business: #8a8ea8;
-  --category-technology: #7893a8;
-  --category-sports: #a87878;
-  --category-entertainment: #c89078;
-  --category-science: #78a8a8;
-  --category-health: #8ea87b;
+  --color-border: #2d3748;
+  
+  /* Safe area insets for mobile devices */
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-surface: var(--surface);
-  --color-surface-secondary: var(--surface-secondary);
-  
-  --color-foreground: var(--foreground);
-  --color-foreground-secondary: var(--foreground-secondary);
-  --color-foreground-muted: var(--foreground-muted);
-  
-  --color-accent-primary: var(--accent-primary);
-  --color-accent-primary-hover: var(--accent-primary-hover);
-  --color-accent-secondary: var(--accent-secondary);
-  --color-accent-info: var(--accent-info);
-  --color-accent-warning: var(--accent-warning);
-  
-  /* Category color utilities */
-  --color-category-world: var(--category-world);
-  --color-category-politics: var(--category-politics);
-  --color-category-business: var(--category-business);
-  --color-category-technology: var(--category-technology);
-  --color-category-sports: var(--category-sports);
-  --color-category-entertainment: var(--category-entertainment);
-  --color-category-science: var(--category-science);
-  --color-category-health: var(--category-health);
-  
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Dark mode with warm tones */
-    --background: #1a1816;
-    --surface: #252220;
-    --surface-secondary: #2d2926;
-    
-    --foreground: #e8e4dc;
-    --foreground-secondary: #c4bfb5;
-    --foreground-muted: #8a8077;
-    
-    --accent-primary: #e68a4f;
-    --accent-primary-hover: #f29d63;
-    --accent-secondary: #92b5a3;
-    --accent-info: #8aa8c4;
-    --accent-warning: #e6b85f;
-  }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-  line-height: 1.6;
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
 }
 
-/* Generous whitespace helpers */
-.comfortable-spacing {
-  padding: 1.5rem;
+/* Hide scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
-@media (min-width: 768px) {
-  .comfortable-spacing {
-    padding: 2rem;
-  }
-}
-
-/* Hide scrollbar for swipe navigation */
-.scrollbar-hide {
+.no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
+/* Line clamp */
+.line-clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
